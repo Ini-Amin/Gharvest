@@ -1,0 +1,78 @@
+═══════════════════════════════════════════════════════════════
+ ANDROID EMULATOR (docker-android) — CHEATSHEET KONTROL
+═══════════════════════════════════════════════════════════════
+
+LAYAR DI BROWSER:
+  http://127.0.0.1:6080/vnc.html  → klik Connect
+  (kalau masih splash DOCKERANDROID = masih booting, tunggu 1 menit, refresh)
+
+SEMUA PERINTAH DI BAWAH DIKETIK DI TERMINAL LAPTOP
+prefix singkat:  AE="podman exec docker-android adb -s emulator-5554"
+
+── LAYAR ─────────────────────────────────────────────────────
+$AE exec-out screencap -p > layar.png          # screenshot → file
+$AE shell input tap <x> <y>                    # tap koordinat (layar 1080x1920)
+$AE shell input swipe <x1> <y1> <x2> <y2> 300  # swipe/gestur (durasi ms)
+$AE shell input text "teks%stanung"            # ketik teks (spasi = %s)
+$AE shell input keyevent 66                    # Enter (66=ENTER, 4=BACK, 3=HOME)
+
+── STATUS & DIAGNOSTIK ────────────────────────────────────────
+$AE shell getprop sys.boot_completed           # 1 = boot selesai
+$AE shell getprop ro.build.fingerprint         # identitas device
+$AE shell dumpsys account | grep "Account {"   # daftar akun terpasang
+$AE shell settings get secure android_id       # SSAID
+podman exec docker-android adb -s emulator-5554 shell "sqlite3 \
+  /data/data/com.google.android.gsf/databases/gservices.db \
+  \"select value from main where name='android_id'\""   # GSF ID
+podman logs --tail 20 docker-android           # log container
+podman exec docker-android tail -5 /tmp/emu.log # log emulator
+
+── APLIKASI ───────────────────────────────────────────────────
+$AE shell am start -a android.intent.action.VIEW -d <URL>   # buka URL
+$AE shell monkey -p com.google.android.googlequicksearchbox \
+  -c android.intent.category.LAUNCHER 1                     # buka Google App
+$AE shell pm list packages | grep google                    # daftar app Google
+$AE shell am force-stop <paket>                             # matikan app
+
+── RESTART / RESET ────────────────────────────────────────────
+$AE reboot                                   # reboot Android (tunggu ~1 menit)
+podman restart docker-android                # restart container (AVD & proses hilang,
+                                             #   start emulator ulang manual, lihat bawah)
+podman rm -f docker-android                  # HAPUS total → GSF ID BARU saat dibuat lagi
+
+── START EMULATOR SETELAH CONTAINER RESTART ───────────────────
+podman exec docker-android bash -c 'echo no | avdmanager create avd -n android \
+  -k "system-images;android-28;google_apis;x86_64" --device pixel --force'
+podman exec -d docker-android bash -c 'nohup emulator @android -no-window \
+  -no-snapshot -no-boot-anim -gpu swiftshader_indirect -port 5554 \
+  -no-metrics > /tmp/emu.log 2>&1 &'
+
+── JARINGAN EMULATOR (kalau app bilang offline) ───────────────
+podman exec docker-android sysctl -w net.ipv4.ip_forward=1
+podman exec docker-android iptables -t nat -A POSTROUTING \
+  -s 192.168.232.0/21 -o eth0 -j MASQUERADE
+$AE shell ip route add default via 192.168.232.1 dev wlan0
+
+═══════════════════════════════════════════════════════════════
+ SCRCPY — CARA PALING ENAK (mouse + keyboard native, seperti TeamViewer HP)
+═══════════════════════════════════════════════════════════════
+Sudah jalan sekarang: window "Android Emulator — Farm" di laptop.
+- Mouse = tap/swipe, keyboard laptop = ketik langsung. TIDAK perlu koordinat angka.
+- Shortcut scrcpy penting:
+    Ctrl+h  = Home        Ctrl+b / klik-tengah = Back
+    Ctrl+s  = app switch  Ctrl+p  = power
+    Ctrl+o  = layar off   Ctrl+Shift+o = layar on
+    Ctrl+r  = rotasi      Klik-kanan = Back
+    Ctrl+v  = paste (kirim clipboard)
+    Ketik langsung untuk isian form;IME Google muncul di HP virtual.
+
+MENJALANKAN ULANG (kalau laptop reboot / window tertutup):
+  adb connect 127.0.0.1:5555
+  scrcpy -s 127.0.0.1:5555 --window-title "Android Emulator — Farm"
+
+MENGAPA noVNC tadi tidak tampil di browser Anda:
+  server noVNC SEHAT (test websocket 101 OK dari laptop).
+  Biasanya penyebab: buka https:// bukan http://, atau ekstensi browser
+  blok WebSocket ws://, atau cache. Kalau mau dicoba lagi:
+  http://127.0.0.1:6080/vnc.html (PASTI http, bukan https) → Connect.
+  Tapi scrcpy sudah menggantikan perannya — UX jauh lebih baik.
