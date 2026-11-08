@@ -1,5 +1,15 @@
 ## Status TERKINI (2026-11-08 — LOGIN TEST A14 + A11, hasil akhir overnight)
 
+### PENUTUP (2026-11-08 ~22:27): FARM EMULATOR DIMATIKAN
+- User memutuskan stop: farm tidak berhasil + perlu modal SMS yang tidak tersedia.
+- Semua emulator di-kill, container `docker-android` **di-STOP** (bukan rm — AVD
+  `android30ps`/`android30`/A14 profile + image masih tersimpan; restart: `podman
+  start docker-android` lalu start emulator per README quick-start).
+- scrcpy bridge (socat 5039/27183) + `scrcpy-emu` wrapper masih ada di laptop.
+- Jalur kalau suatu saat lanjut lagi: akun baru via browser + SMS non-VoIP
+  ($0.50-0.80/nomor, DaisySMS/SMSPool), atau selesaikan login `norlanhoy`
+  (2FA = ketik nomor manual, SMS ke nomor itu) — keduanya butuh keputusan modal/nomor.
+
 ### Update siang (2026-11-08 ~15:30): 2FA norlanhoy = manual phone-entry challenge
 - Login `norlanhoy` di A14 lolos password → 2FA "Verify your phone number".
 - "TRY ANOTHER WAY" hanya menawarkan **satu** opsi: SMS. Tanpa prompt/recovery.
