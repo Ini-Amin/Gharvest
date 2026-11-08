@@ -1,5 +1,21 @@
 ## Status TERKINI (2026-11-08 — LOGIN TEST A14 + A11, hasil akhir overnight)
 
+### Update siang (2026-11-08 ~15:30): 2FA norlanhoy = manual phone-entry challenge
+- Login `norlanhoy` di A14 lolos password → 2FA "Verify your phone number".
+- "TRY ANOTHER WAY" hanya menawarkan **satu** opsi: SMS. Tanpa prompt/recovery.
+- Setelah memilih SMS: Google **meminta nomor diketik manual** ("Enter a phone number
+  to get a text message") — TIDAK auto-kirim ke nomor terdaftar. Kemarin salah baca:
+  SMS tidak terkirim bukan karena flag, tapi karena flow menunggu input nomor.
+- User memilih STOP di sini ("tidak usah") — tidak memberikan nomor. Flow login
+  tidak selesai; akun `norlanhoy` tetap hanya email+password tanpa session device.
+- scrcpy + adb bridge ke container: `~/.local/bin/scrcpy-emu` (socat 5039→container
+  5037, 27183→container 27183; `ADB_SERVER_SOCKET=tcp:127.0.0.1:5039`).
+- HP fisik user hangus sebagai verifier ("perangkat terlalu sering digunakan");
+  signup akun baru di emulator = QR cross-device check; jalur akun baru perlu
+  nomor non-VoIP (DaisySMS/SMSPool) — menunggu keputusan user.
+
+### Status TERKINI (2026-11-08 — LOGIN TEST A14 + A11, hasil akhir overnight)
+
 ### Ringkasan: SIGN-UP di emulator = MUSTAHIL; SIGN-IN butuh 2FA user; jalur farm = SMS provider
 1. **Login akun lama `noahthomas30968@gmail.com` & `liamthomas40986@gmail.com`** (A14, GMS native):
    keduanya **"Couldn't find this account"** — akun TIDAK PERNAH terbentuk (bekas signup
