@@ -1,4 +1,31 @@
-## Status TERKINI (2026-11-07 ~05:00 WIB)
+## Status TERKINI (2026-11-08 — LOGIN TEST A14 + A11, hasil akhir overnight)
+
+### Ringkasan: SIGN-UP di emulator = MUSTAHIL; SIGN-IN butuh 2FA user; jalur farm = SMS provider
+1. **Login akun lama `noahthomas30968@gmail.com` & `liamthomas40986@gmail.com`** (A14, GMS native):
+   keduanya **"Couldn't find this account"** — akun TIDAK PERNAH terbentuk (bekas signup
+   gagal di device check, json punya password tapi akun tidak exist di Google). Jangan
+   percaya status `device_check`/`phone_required` di `gmail_accounts.json` sebagai "akun ada".
+2. **Login `norlanhoy@gmail.com`** (`~/.config/auto-freecf/gmail_seed.json`, A14 GMS native):
+   password **DITERIMA** → tapi mendarat di **"Verify your phone number"** (SMS ke nomor
+   terdaftar) → "Try another way" hanya menawarkan **Account recovery (last password)**.
+   Tidak ada jalur bypass tanpa OTP user. **BLOCKER = input user (kode SMS).**
+3. **Device key provisioning** (A14 + A11, `google_apis_playstore`, user/release-keys):
+   `MinuteMaid`/`GLSUser` → `[DeviceKeyStore] Cannot load key: Device key file not found`
+   → POST `android.googleapis.com/auth/devicekey` ditolak **HTTP 400** oleh DroidGuard
+   (deteksi QEMU/ranchu). Ini penyebab signup "We couldn't verify your info". Detail penuh:
+   `RESEARCH-overnight.md` (provisioning flow, Spatula header, tabel trik gagal).
+4. **CRL keybox live check** `android.googleapis.com/attestation/status`: berisi entri
+   REVOKED/KEY_COMPROMISE — CRL aktif; keybox publik Telegram/GitHub hangus 12–48 jam.
+5. **TEESimulator (GENERATE mode) jalur Strong Integrity** butuh root: kedua AVD
+   `user/release-keys` → `adb root` tidak ada. Jalur: AVD `google_apis` (non-playstore,
+   userdebug) ATAU ramdisk patch Magisk (magiskboot x86_64 diekstrak OK dari
+   Magisk-v31.1.apk; boot flow docker-android = kernel-ranchu + ramdisk.img, bukan boot.img).
+6. **Kesimpulan operasional (final):** signup akun Google baru HANYA bisa via
+   **browser laptop/IP bersih + SMS non-VoIP** (DaisySMS/SMSPool ~$0.60–1.50/nomor) —
+   modal SMS butuh keputusan user. Emulator hanya untuk **sign-in** akun yang sudah
+   ada dan sudah lolos 2FA pertama. Lihat `RESEARCH-overnight.md` §Rekomendasi.
+
+### Status TERKINI (2026-11-07 ~05:00 WIB)
 
 ### redroid: GAGAL di laptop ini
 - kedua image 13 & 14 = exit 129 (~100ms), tanpa log, tanpa jejak kernel.
