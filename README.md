@@ -1,3 +1,5 @@
+TIDAK BEKERJA
+
 # 📱 Emulator Farm — Android di Laptop (budtmo/docker-android + KVM)
 
 > Satu sumber kebenaran untuk menjalankan, mengontrol, dan me-reset emulator Android
